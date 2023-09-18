@@ -1,0 +1,8 @@
+Program first;
+Var a,b,c Integer;
+Begin
+a=3;
+b=2;
+c=a+b;
+write(c);
+End
