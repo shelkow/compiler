@@ -8,13 +8,11 @@ namespace compiler.Types.Tokens.Enumerations
 {
     enum KeywordType
     {
-        /*
         Int,
         Void,
         Return,
         If,
         While,
-        */
         Integer,
         Begin,
         End,

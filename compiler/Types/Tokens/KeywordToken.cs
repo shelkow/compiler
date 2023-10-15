@@ -9,11 +9,11 @@ namespace compiler.Types.Tokens
         //cловарь ключевых слов
         private static readonly Dictionary<string, KeywordType> validKeywords = new Dictionary<string, KeywordType>()
         {
-           // { "if", KeywordType.If },
+             { "if", KeywordType.If },
             { "Integer", KeywordType.Integer},
-           // { "return", KeywordType.Return },
-           // { "void", KeywordType.Void },
-          //  { "while", KeywordType.While },
+             { "return", KeywordType.Return },
+             { "void", KeywordType.Void },
+            { "while", KeywordType.While },
             { "Begin", KeywordType.Begin },
             { "End", KeywordType.End },
             { "Var", KeywordType.Var },
