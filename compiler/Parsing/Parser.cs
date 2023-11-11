@@ -16,196 +16,213 @@ namespace compiler.Parsing
     /// <summary>
     /// Parser for the compiler language.
     /// </summary>
+
     class Parser
     {
-        public Token[] Tokens { get; private set; }
+        private List<Token> tokens;
+        private int currentTokenIndex;
 
-        private int readingPosition;
-        private Stack<StatementSequenceNode> scopes;
-
-        private static readonly KeywordType[] typeKeywords = { KeywordType.Int, KeywordType.Void };
-
-        public Parser(Token[] tokens)
+        public Parser(List<Token> tokens)
         {
-            this.Tokens = tokens;
-
-            readingPosition = 0;
-            scopes = new Stack<StatementSequenceNode>();
+            this.tokens = tokens;
+            this.currentTokenIndex = 0;
         }
 
-        public ProgramNode ParseToAst()
+        public void Analyze()
         {
-            scopes.Push(new ProgramNode());
+            R1_ProgramBlock();
+            R2_VariableDeclaration();
+            R4_CheckBrackets();
 
-            while (!eof())
+        }
+        //IdentifierToken OperatorToken NumberLiteralToken
+
+        public Token NextToken(int id)
+        {
+            for (int i = 0; i < 1; i++)
             {
-                if (peek() is KeywordToken)
-                {
-                    var keyword = (KeywordToken)next();
+                tokens[i] = tokens[i + 1];
+            }
+            return tokens[currentTokenIndex];
+        }
+        //(Program)Keyword (first)Identifier
+        //(Var)Keyword (a)Identifier,(,)ArgSeparator,(b)Identifier
+        //(a)Identifier (=)Operator (3)Number
+        //(c)Identifier (=)Operator (a)Identifier (+)Operator (b)Identifier c=a+b;
+        //(write)Identifier BraceLeft BraceRight
 
-                    if (scopes.Count == 1) //we are a top level, the only valid keywords are variable types, starting a variable or function definition
+        //Блок Program
+        public void R1_ProgramBlock()
+        {
+            Console.WriteLine("Начало блока Program");
+            int bufferindex = 0;
+
+            for (var i = 0; i < 2; i++)
+            {
+                bufferindex++;
+                //Можно lab lab1, нельзя 1lab и 1
+                if (tokens[0].Content == "Program")
+                {
+                    if (tokens[i].GetType().Name == "IdentifierToken")
                     {
-                        if (keyword.IsTypeKeyword)
+                        Console.WriteLine("Название программы " + tokens[1].Content);
+
+                        if (tokens[i + 1].GetType().Name == "StatementSeperatorToken")
                         {
-                            var varType = keyword.ToVariableType();
-                            //it must be followed by a identifier:
-                            var name = readToken<IdentifierToken>();
-                            //so see what it is (function or variable):
-                            Token lookahead = peek();
-                            if (lookahead is OperatorToken && (((OperatorToken)lookahead).OperatorType == OperatorType.Assignment) || lookahead is StatementSeperatorToken) //variable declaration
-                            {
-                                if (lookahead is OperatorToken)
-                                    next(); //skip the "="
-                                scopes.Peek().AddStatement(new VariableDeclarationNode(varType, name.Content, ExpressionNode.CreateFromTokens(readUntilStatementSeperator())));
-                            }
-                            else if (lookahead is OpenBraceToken && (((OpenBraceToken)lookahead).BraceType == BraceType.Round)) //function definition
-                            {
-                                var func = new FunctionDeclarationNode(name.Content);
-                                scopes.Peek().AddStatement(func); //add the function to the old (root) scope...
-                                scopes.Push(func); //...and set it a the new scope!
-                                //Read the argument list
-                                next(); //skip the opening brace
-                                while (!(peek() is CloseBraceToken && ((CloseBraceToken)peek()).BraceType == BraceType.Round)) //TODO: Refactor using readUntilClosingBrace?
-                                {
-                                    var argType = readToken<KeywordToken>();
-                                    if (!argType.IsTypeKeyword)
-                                        throw new ParsingException("Expected type keyword!");
-                                    var argName = readToken<IdentifierToken>();
-                                    func.AddParameter(new ParameterDeclarationNode(argType.ToVariableType(), argName.Content));
-                                    if (peek() is ArgSeperatorToken) //TODO: Does this allow (int a int b)-style functions? (No arg-seperator!)
-                                        next(); //skip the sperator
-                                }
-                                next(); //skip the closing brace
-                                var curlyBrace = readToken<OpenBraceToken>();
-                                if (curlyBrace.BraceType != BraceType.Curly)
-                                    throw new ParsingException("Wrong brace type found!");
-                            }
-                            else
-                                throw new Exception("The parser encountered an unexpected token.");
-                        }
-                        else
-                            throw new ParsingException("Found non-type keyword on top level.");
-                    }
-                    else //we are in a nested scope
-                    {
-                        //TODO: Can we avoid the code duplication from above?
-                        if (keyword.IsTypeKeyword) //local variable declaration!
-                        {
-                            var varType = keyword.ToVariableType();
-                            //it must be followed by a identifier:
-                            var name = readToken<IdentifierToken>();
-                            //so see what it is (function or variable):
-                            Token lookahead = peek();
-                            if (lookahead is OperatorToken && (((OperatorToken)lookahead).OperatorType == OperatorType.Assignment) || lookahead is StatementSeperatorToken) //variable declaration
-                            {
-                                if (lookahead is OperatorToken)
-                                    next(); //skip the "="
-                                scopes.Peek().AddStatement(new VariableDeclarationNode(varType, name.Content, ExpressionNode.CreateFromTokens(readUntilStatementSeperator())));
-                            }
+                            Console.WriteLine("Конец блока Program");
                         }
                         else
                         {
-                            switch (keyword.KeywordType)
-                            {
-                                case KeywordType.Return:
-                                    scopes.Peek().AddStatement(new ReturnStatementNode(ExpressionNode.CreateFromTokens(readUntilStatementSeperator())));
-                                    break;
-                                case KeywordType.If:
-                                    var @if = new IfStatementNode(ExpressionNode.CreateFromTokens(readUntilClosingBrace()));
-                                    scopes.Peek().AddStatement(@if);
-                                    scopes.Push(@if);
-                                    break;
-                                case KeywordType.While:
-                                    var @while = new WhileLoopNode(ExpressionNode.CreateFromTokens(readUntilClosingBrace()));
-                                    scopes.Peek().AddStatement(@while);
-                                    scopes.Push(@while);
-                                    break;
-                                default:
-                                    throw new ParsingException("Unexpected keyword type.");
-                            }
+                            Console.WriteLine("Ожидалcя cимвол ;");
                         }
                     }
-                }
-                else if(peek() is IdentifierToken && scopes.Count > 1) //in nested scope
-                {
-                    var name = readToken<IdentifierToken>();
-                    if(peek() is OperatorToken && ((OperatorToken)peek()).OperatorType == OperatorType.Assignment) //variable assignment
+                    else
                     {
-                        next(); //skip the "="
-                        scopes.Peek().AddStatement(new VariableAssingmentNode(name.Content, ExpressionNode.CreateFromTokens(readUntilStatementSeperator())));
+                        if (i == 1)
+                        {
+                            Console.WriteLine("Название программы должно быть идентификатором, например Exercize1");
+                        }
                     }
-                    else //lone expression (incl. function calls!)
-                        scopes.Peek().AddStatement(ExpressionNode.CreateFromTokens(new[]{name}.Concat(readUntilStatementSeperator()))); //don't forget the name here!
-                }
-                else if(peek() is CloseBraceToken)
-                {
-                    var brace = readToken<CloseBraceToken>();
-                    if (brace.BraceType != BraceType.Curly)
-                        throw new ParsingException("Wrong brace type found!");
-                    scopes.Pop(); //Scope has been closed!
                 }
                 else
-                    throw new ParsingException("The parser ran into an unexpeted token.");
+                {
+                    Console.WriteLine("Ожидалось ключевое слово Program");
+                }
             }
-
-            if (scopes.Count != 1)
-                throw new ParsingException("The scopes are not correctly nested.");
-
-            return (ProgramNode)scopes.Pop();
         }
-
-        private IEnumerable<Token> readTokenSeqence(params Type[] expectedTypes)
+        //Блок Var
+        public int buff, bufferindex2;
+        public void R2_VariableDeclaration()
         {
-            foreach (var t in expectedTypes)
+            Console.WriteLine("Начало блока Var");
+
+            for (var i = 3; i < tokens.Count; i++)
             {
-                if (!t.IsAssignableFrom(peek().GetType()))
-                    throw new ParsingException("Unexpected token");
-                yield return next();
+                bufferindex2++;
+                //Можно lab lab1, нельзя 1lab и 1
+                if (tokens[3].Content == "Var")
+                {
+
+                    //Console.WriteLine(tokens[i].Content);
+                    if (tokens[i].GetType().Name == "IdentifierToken")
+                    {
+                        if (tokens[i + 1].GetType().Name == "ArgSeperatorToken")
+                        {
+                            Console.WriteLine("Переменная " + tokens[i].Content);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Переменная " + tokens[i].Content);
+                            if (tokens[i + 1].Content == ":" && tokens[i+2].Content == "Integer")
+                            {
+                                Console.WriteLine("Тип данных " + tokens[i + 2].Content);
+                                if (tokens[i + 3].GetType().Name == "StatementSeperatorToken")
+                                {
+                                    Console.WriteLine("Конец блока Var");
+                                    buff = i + 4;
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Ожидалось перечисление переменных или тип данных");
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Синтаксическая ошибка, укажите тип данных!");
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (tokens[i].GetType().Name == "NumberLiteralToken")
+                        {
+
+                            Console.WriteLine("Название переменной должно быть идентификатором, например v2");
+                        }
+                        else
+                        {
+                            if ((tokens[i].Content == "="))
+                            {
+                                Console.WriteLine("Cинтаксическая ошибка");
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Ожидалось ключевое слово Var");
+                    break;
+                }
+            }
+            // Console.WriteLine(tokens.Count());
+        }
+        public void NumberLine(Token token)
+        {
+            var Lines = File.ReadAllLines("C:/Users/shelk/source/repos/compiler_/InputFile.txt");
+            for (int i = 0; i < Lines.Length; i++)
+            {
+                if (Lines[i].Contains(token.Content))
+                {
+                    i++;
+                    Console.Write("Ошибка в строке номер" + " " + i);
+                }
+            }
+        }
+        Stack<string> brackets = new Stack<string>();
+        public void R3_BeginEnd(Token token)
+        {
+            if (token.Content == "End")
+            {
+                Console.WriteLine("Конец блока Begin");
+            }
+            if (token.Content == "Begin")
+            {
+                Console.WriteLine("Начало блока Begin");
+            }
+            if ((token is OperatorToken && token.Content == "=") || (token is OperatorToken && token.Content == "=-"))
+            {
+                Console.WriteLine("Присваивание переменной");
             }
         }
 
-        private IEnumerable<Token> readUntilClosingBrace()
-        {
-            //TODO: Only allow round braces, handle nested braces!
-            while (!eof() && !(peek() is CloseBraceToken))
-                yield return next();
-            next(); //skip the closing brace
-        }
+        public void R4_CheckBrackets()
+        {         
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                R3_BeginEnd(tokens[i]);
+                if (tokens[i] is OpenBraceToken)
+                {
+                    Console.WriteLine("Скобка открыта");
+                    brackets.Push(tokens[i].Content);
 
-        private IEnumerable<Token> readUntilStatementSeperator()
-        {
-            while (!eof() && !(peek() is StatementSeperatorToken))
-                yield return next();
-            next(); //skip the semicolon
-        }
+                }
+                else
+                    if (tokens[i] is CloseBraceToken)
+                {
+                    if (brackets.Count > 0)
+                    {
+                        Console.WriteLine("Скобка успешно закрыта");
+                        brackets.Pop();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка со структурой скобок, недопустимый символ " + tokens[i].Content);
+                        // NumberLine(tokens[i]);
+                        break;
+                    }
+                }
+            }
+            if (brackets.Count > 0)
+            {
+                Console.WriteLine("Произошла ошибка со скобками, недопустимый символ " + brackets.Pop());
+                Console.WriteLine("Ожидалось закрытие скобки");
+            }
 
-        private TExpected readToken<TExpected>() where TExpected : Token
-        {
-            if (peek() is TExpected)
-                return (TExpected)next();
-            else
-                throw new ParsingException("Unexpected token " + peek());
-        }
-
-        [DebuggerStepThrough]
-        private Token peek()
-        {
-            //TODO: Check for eof()
-            return Tokens[readingPosition];
-        }
-
-        [DebuggerStepThrough]
-        private Token next()
-        {
-            var ret = peek();
-            readingPosition++;
-            return ret;
-        }
-
-        [DebuggerStepThrough]
-        private bool eof()
-        {
-            return readingPosition >= Tokens.Length;
-        }
-    }
+        } 
+    } 
 }
+    

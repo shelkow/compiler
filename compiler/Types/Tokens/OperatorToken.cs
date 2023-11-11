@@ -9,8 +9,11 @@ namespace compiler.Types.Tokens
         static readonly Dictionary<string, OperatorType> validOperators = new Dictionary<string, OperatorType>()
         {
             { "+", OperatorType.Add },
+            { "-", OperatorType.SubstractNegate },
             { "&", OperatorType.And },
             { "=", OperatorType.Assignment },
+            { "=-", OperatorType.NegativeDeclaration },
+            { "=+", OperatorType.PlusDeclaration },
             { "/", OperatorType.Divide },
             { "==", OperatorType.Equals },
             { ">=", OperatorType.GreaterEquals },
@@ -22,7 +25,7 @@ namespace compiler.Types.Tokens
             { "!", OperatorType.Not },
             { "!=", OperatorType.NotEquals },
             { "|", OperatorType.Or },
-            { "-", OperatorType.SubstractNegate },
+            { ":", OperatorType.DoublePoint },
         };
 
         public OperatorType OperatorType { get; private set; }

@@ -9,6 +9,9 @@ namespace compiler.Types.Tokens.Enumerations
     enum OperatorType
     {
         Add,
+        NegativeDeclaration,
+        PlusDeclaration,
+        DoublePoint,
         SubstractNegate, //отрицание будет иметь то же строковое представление, что и вычитание
         Multiply,
         Divide,

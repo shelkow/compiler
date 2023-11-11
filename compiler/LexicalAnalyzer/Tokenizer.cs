@@ -11,21 +11,21 @@ namespace compiler.LexicalTokenizer
         void FileCheck(char symbol)
         {
             FileStream fs1;
-            if (!File.Exists(@"C:\Users\shelk\source\repos\compiler\Errors.txt"))
+            if (!File.Exists(@"C:\Users\shelk\source\repos\compiler_\Errors.txt"))
             {
-                fs1 = File.Create(@"C:\Users\shelk\source\repos\compiler\Errors.txt");
+                fs1 = File.Create(@"C:\Users\shelk\source\repos\compiler_\Errors.txt");
                 Console.WriteLine("\nErrors файл создан!");
                 fs1.Close();
             }
             Console.WriteLine("\nПроизошла ошибка, проверьте файл Erorrs!");
-            fs1 = File.Open(@"C:\Users\shelk\source\repos\compiler\Errors.txt", FileMode.Open, FileAccess.ReadWrite);
+            fs1 = File.Open(@"C:\Users\shelk\source\repos\compiler_\Errors.txt", FileMode.Open, FileAccess.ReadWrite);
             fs1.SetLength(0);
             fs1.Close();
 
-            StreamWriter file3 = new StreamWriter(@"C:\Users\shelk\source\repos\compiler\Errors.txt", true);
+            StreamWriter file3 = new StreamWriter(@"C:\Users\shelk\source\repos\compiler_\Errors.txt", true);
             file3.Write("Ошибка! Обнаружен неопознанный символ = "+symbol);
             file3.Close();
-            fs1 = File.Open(@"C:\Users\shelk\source\repos\compiler\OutputFile.txt", FileMode.Open, FileAccess.ReadWrite);
+            fs1 = File.Open(@"C:\Users\shelk\source\repos\compiler_\OutputFile.txt", FileMode.Open, FileAccess.ReadWrite);
             fs1.SetLength(0);
             fs1.Close();
             Console.WriteLine("OutputFile очищен!");
@@ -152,6 +152,7 @@ namespace compiler.LexicalTokenizer
                 case '&':
                 case '|':
                 case '=':
+                case ':':
                     return CharType.Operator;
                 case '(':
                 case '[':

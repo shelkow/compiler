@@ -1,32 +1,43 @@
-Type of token = [KeywordToken] - Program
-Type of token = [IdentifierToken] - first
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [KeywordToken] - Var
-Type of token = [IdentifierToken] - a
-Type of token = [ArgSeperatorToken] - ,
-Type of token = [IdentifierToken] - b
-Type of token = [ArgSeperatorToken] - ,
-Type of token = [IdentifierToken] - c
-Type of token = [KeywordToken] - Integer
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [KeywordToken] - Begin
-Type of token = [IdentifierToken] - a
-Type of token = [OperatorToken] - =
-Type of token = [NumberLiteralToken] - 3
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [IdentifierToken] - b
-Type of token = [OperatorToken] - =
-Type of token = [NumberLiteralToken] - 2
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [IdentifierToken] - c
-Type of token = [OperatorToken] - =
-Type of token = [IdentifierToken] - a
-Type of token = [OperatorToken] - +
-Type of token = [IdentifierToken] - b
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [IdentifierToken] - write
-Type of token = [OpenBraceToken] - (
-Type of token = [IdentifierToken] - c
-Type of token = [CloseBraceToken] - )
-Type of token = [StatementSeperatorToken] - ;
-Type of token = [KeywordToken] - End
+[KeywordToken] - Program
+[IdentifierToken] - first2
+[StatementSeperatorToken] - ;
+[KeywordToken] - Var
+[IdentifierToken] - a
+[ArgSeperatorToken] - ,
+[IdentifierToken] - b
+[ArgSeperatorToken] - ,
+[IdentifierToken] - c
+[OperatorToken] - :
+[KeywordToken] - Integer
+[StatementSeperatorToken] - ;
+[KeywordToken] - Begin
+[IdentifierToken] - a
+[OperatorToken] - =
+[OperatorToken] - -
+[NumberLiteralToken] - 3
+[StatementSeperatorToken] - ;
+[IdentifierToken] - b
+[OperatorToken] - =
+[NumberLiteralToken] - 2
+[StatementSeperatorToken] - ;
+[IdentifierToken] - c
+[OperatorToken] - =
+[OperatorToken] - -
+[IdentifierToken] - a
+[OperatorToken] - +
+[IdentifierToken] - b
+[StatementSeperatorToken] - ;
+[IdentifierToken] - d
+[OperatorToken] - =
+[OpenBraceToken] - (
+[OperatorToken] - -
+[IdentifierToken] - c
+[OperatorToken] - *
+[OpenBraceToken] - (
+[IdentifierToken] - b
+[OperatorToken] - +
+[IdentifierToken] - c
+[CloseBraceToken] - )
+[CloseBraceToken] - )
+[StatementSeperatorToken] - ;
+[KeywordToken] - End

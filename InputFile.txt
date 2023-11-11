@@ -1,8 +1,8 @@
-Program first;
-Var a,b,c Integer;
+Program first2 ;
+Var a , b , c : Integer ;
 Begin
-a=3;
-b=2;
-c=a+b;
-write(c);
+a = - 3;
+b = 2;
+c = - a + b ;
+d = (-c*(b+c));
 End

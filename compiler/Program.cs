@@ -1,4 +1,6 @@
 ﻿using compiler.LexicalTokenizer;
+using compiler.Parsing;
+using compiler.Types;
 
 namespace compiler
 {
@@ -9,15 +11,15 @@ namespace compiler
             string code;
             //Если файл не существует то создать
             FileStream fs;
-            if (!File.Exists(@"C:\Users\shelk\source\repos\compiler\InputFile.txt"))
+            if (!File.Exists(@"C:\Users\shelk\source\repos\compiler_\InputFile.txt"))
             {
-                fs = File.Create(@"C:\Users\shelk\source\repos\compiler\InputFile.txt");
+                fs = File.Create(@"C:\Users\shelk\source\repos\compiler_\InputFile.txt");
                 Console.WriteLine("InputFile создан!");
                 fs.Close();
             }
             
             //Считываем с файла текст в строку
-            StreamReader file = new StreamReader(@"C:\Users\shelk\source\repos\compiler\InputFile.txt");
+            StreamReader file = new StreamReader(@"C:\Users\shelk\source\repos\compiler_\InputFile.txt");
             code = file.ReadToEnd();
             //вывод считанной из файла строки в консоль
             for (int i = 0; i < code.Length; i++)
@@ -25,20 +27,28 @@ namespace compiler
                 Console.Write(code[i]);
             }
             file.Close();
-
+            Console.WriteLine("");
             var lexer = new Tokenizer(code);
             var tokens = lexer.Tokenize();
-            fs = File.Open(@"C:\Users\shelk\source\repos\compiler\OutputFile.txt", FileMode.Open, FileAccess.ReadWrite);
+            fs = File.Open(@"C:\Users\shelk\source\repos\compiler_\OutputFile.txt", FileMode.Open, FileAccess.ReadWrite);
             fs.SetLength(0);
             fs.Close();
-            StreamWriter file2 = new StreamWriter(@"C:\Users\shelk\source\repos\compiler\OutputFile.txt",true);
+            StreamWriter file2 = new StreamWriter(@"C:\Users\shelk\source\repos\compiler_\OutputFile.txt", true);
+            List<Token> tree = new List<Token>();
 
             foreach (var token in tokens)
             {
                 file2.Write(token + "\n");
+                tree.Add(token);
+
             }
             file2.Close();
-           // Console.ReadKey(false);
+
+            var parser = new Parser(tree);
+            parser.Analyze();
+
+
+            // Console.ReadKey(false);
 
             /*  string code = @"
            int main()
